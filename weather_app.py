@@ -2,10 +2,12 @@ import datetime as dt
 import json 
 import weather_struct
 import requests
+import random
 from flask import Flask, jsonify, request
 
-API_TOKEN = "f0r_w3ath3r_use_0nly"
-RSA_KEY = "cfee65c7b176da50b5efd2d377c470c2"
+
+API_TOKEN = ""
+RSA_KEY = ""
 
 app = Flask(__name__)
 
@@ -29,12 +31,12 @@ class InvalidUsage(Exception):
 def get_weather(exclude: str, limit:int = 1):
     url_base = "https://api.openweathermap.org/data/2.5/weather?"
     limit = 1
-    location = "Kyiv"
+    cities = ["Kyiv", "London", "Madrid", "Sydney"]
+    location = str(random.choice(cities))
     units = "metric"
     url = url_base + "q=" + location + "&appid=" + RSA_KEY +"&units=" + units
 
     response = requests.get(url)
-    # return json.loads(response.text)
     
     if response.status_code == requests.codes.ok:
         return json.loads(response.text)
@@ -73,6 +75,8 @@ def weather_endpoint():
     weather = weather_struct.Weather(weather_data)
     end_time =dt.datetime.now()
 
+    
+
     result ={
         "event_start_datetime": start_time.isoformat(),
         "event_finished_datetime": end_time.isoformat(),
@@ -82,12 +86,37 @@ def weather_endpoint():
     }
     return result
 
-if __name__ == "__main__":
-    app.run(debug=True)
 
+
+
+@app.route("/content/api/integration/get/weather/forcast", methods=["POST"])  #Try to change path
+def weather_endpoint_forcast():
+    start_time = dt.datetime.now()
+    json_data = request.get_json()
+
+    if json_data.get("token") is None:
+        raise InvalidUsage("There no token =( ", status_code=400)
+
+    token = json_data.get("token")
+
+    if token != API_TOKEN:
+        raise InvalidUsage("Wrong API token, try to use smth else =( ", status_code=403)
+
+    exclude = ""
+    if json_data.get("exclude"):
+        exclude = json_data.get("exclude")
+
+    weather_data = get_weather(exclude)
+    weather = weather_struct.Weather(weather_data)
+    end_time =dt.datetime.now()
 
     
 
-
-
-
+    result ={
+        "event_start_datetime": start_time.isoformat(),
+        "event_finished_datetime": end_time.isoformat(),
+        "event_duration": str(end_time - start_time),
+        "weather": str(weather.to_dict()),
+        "description": weather.conclusion()
+    }
+    return result
