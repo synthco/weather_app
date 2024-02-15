@@ -16,6 +16,7 @@ class Weather:
         self.pressure = self._data["main"]["pressure"]
         self.city_name = self._data["name"]
         self.descript = self._data["weather"][0]["description"]
+        
     def to_dict(self) -> dict:
         weather_dict = {
             "city_name": self.city_name,
@@ -45,10 +46,7 @@ class Weather:
         else:
             con_wind = "The wind is doing its thing, I guess..."
 
-        #main state
-        
-
-        conclusion = f"{con_temp}. {con_wind}. And it's {self.descript}. Wonderful..."
+        conclusion = f"{con_temp}. {con_wind}. And it's {self.descript} in {self.city_name}. Wonderful..."
 
         return conclusion
 

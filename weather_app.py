@@ -30,9 +30,6 @@ def get_weather(exclude: str, limit:int = 1):
     url_base = "https://api.openweathermap.org/data/2.5/weather?"
     limit = 1
     location = "Kyiv"
-
-    date_obj = dt.datetime.now()
-    # date = date_obj.strftime("%Y-%m-%d")
     units = "metric"
     url = url_base + "q=" + location + "&appid=" + RSA_KEY +"&units=" + units
 
@@ -55,7 +52,7 @@ def handle_invalid_usage(error):
 def home_page():
     return "<p><h2> It's a weather. And I'm working =) </h2></p>"
 
-@app.route("/content/api/integration/get/weather", methods=["POST"])  #Try to change path
+@app.route("/content/api/integration/get/weather/now", methods=["POST"])  #Try to change path
 def weather_endpoint():
     start_time = dt.datetime.now()
     json_data = request.get_json()
@@ -84,7 +81,6 @@ def weather_endpoint():
         "description": weather.conclusion()
     }
     return result
-    
 
 if __name__ == "__main__":
     app.run(debug=True)
